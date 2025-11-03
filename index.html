@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>১২ আংশীদার ব্যবসা হিসাব</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .user-info { background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 3px solid #667eea; overflow-x: auto; }
+        .tab { flex: 1; min-width: 150px; padding: 20px; text-align: center; cursor: pointer; font-weight: bold; background: #f8f9fa; border: none; font-size: 16px; transition: all 0.3s; }
+        .tab:hover { background: #e9ecef; }
+        .tab.active { background: white; color: #667eea; border-bottom: 3px solid #667eea; margin-bottom: -3px; }
+        .content { padding: 30px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .btn { background: #667eea; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; transition: all 0.3s; margin: 5px; }
+        .btn:hover { background: #764ba2; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-sm { padding: 8px 15px; font-size: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { padding: 20px; border-radius: 12px; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-card.red { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+        .stat-card.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-card.purple { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+        .stat-card h3 { font-size: 13px; margin-bottom: 8px; opacity: 0.9; }
+        .stat-card .amount { font-size: 26px; font-weight: bold; }
+        .form-card { background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .form-card h3 { color: #667eea; margin-bottom: 20px; font-size: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: bold; margin-bottom: 8px; color: #495057; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 15px; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .transactions-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .transactions-table th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: left; font-size: 14px; }
+        .transactions-table td { padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-size: 14px; }
+        .transactions-table tr:hover { background: #f8f9fa; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .badge-income { background: #d4edda; color: #155724; }
+        .badge-expense { background: #f8d7da; color: #721c24; }
+        .partners-grid, .employees-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .partner-card, .employee-card { background: white; border: 2px solid #dee2e6; padding: 20px; border-radius: 10px; transition: all 0.3s; }
+        .partner-card:hover, .employee-card:hover { border-color: #667eea; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2); transform: translateY(-2px); }
+        .partner-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #dee2e6; }
+        .partner-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
+        .partner-info h3 { font-size: 16px; margin-bottom: 5px; color: #212529; }
+        .partner-info p { font-size: 13px; color: #6c757d; }
+        .partner-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .partner-stat { background: #f8f9fa; padding: 10px; border-radius: 6px; text-align: center; }
+        .partner-stat label { font-size: 11px; color: #6c757d; display: block; margin-bottom: 5px; }
+        .partner-stat .value { font-size: 16px; font-weight: bold; color: #212529; }
+        .partner-stat.income .value { color: #28a745; }
+        .partner-stat.expense .value { color: #dc3545; }
+        .chart-container { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+        .chart-container h3 { margin-bottom: 15px; color: #495057; font-size: 18px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+        .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 50px auto; padding: 30px; border-radius: 15px; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #dee2e6; }
+        .close { font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+        .close:hover { color: #000; }
+        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-header h2 { color: #667eea; margin-bottom: 10px; }
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; margin-left: 8px; }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <h2>🔐 লগইন করুন</h2>
+                <p style="color: #6c757d;">ব্যবসা হিসাব সিস্টেম</p>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>ইউজারনেম</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 20px;">লগইন করুন</button>
+            </form>
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 13px;">
+                <strong>ডেমো লগইন:</strong><br>
+                অ্যাডমিন: admin / admin123<br>
+                ভিউয়ার: viewer / viewer123
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="display: none;">
+        <div class="header">
+            <h1>🏢 ১২ আংশীদার ব্যবসা হিসাব</h1>
+            <p>উন্নত সংস্করণ - সম্পূর্ণ ব্যবস্থাপনা সহ</p>
+            <div class="user-info">
+                <span>👤 <strong id="currentUserName"></strong> (<span id="currentUserRole"></span>)</span>
+                <button class="btn btn-danger btn-sm" onclick="logout()">🚪 লগআউট</button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('dashboard')">📊 ড্যাশবোর্ড</button>
+            <button class="tab" onclick="switchTab('transactions')">💰 লেনদেন</button>
+            <button class="tab" onclick="switchTab('monthly')">📅 মাসিক</button>
+            <button class="tab" onclick="switchTab('partners')">👥 আংশীদার</button>
+            <button class="tab" onclick="switchTab('employees')" id="employeesTab">👨‍💼 কর্মচারী</button>
+            <button class="tab" onclick="switchTab('settings')" id="settingsTab">⚙️ সেটিংস</button>
+        </div>
+        
+        <div class="content">
+            <div id="dashboard" class="tab-content active">
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <label style="font-weight: bold; margin-bottom: 10px; display: block;">মাস নির্বাচন:</label>
+                    <select id="dashboardMonthSelect" onchange="updateDashboard()" style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #dee2e6; border-radius: 8px;">
+                        <option value="all">সকল মাস</option>
+                    </select>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <h3>মোট জমা/আয়</h3>
+                        <div class="amount">৳ <span id="totalIncome">0</span></div>
+                    </div>
+                    <div class="stat-card red">
+                        <h3>মোট ব্যয়/খরচ</h3>
+                        <div class="amount">৳ <span id="totalExpense">0</span></div>
+                    </div>
+                    <div class="stat-card blue">
+                        <h3>নিট লাভ/লোকসান</h3>
+                        <div class="amount">৳ <span id="netProfit">0</span></div>
+                    </div>
+                    <div class="stat-card purple">
+                        <h3>মোট লেনদেন</h3>
+                        <div class="amount"><span id="totalTransactions">0</span> টি</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>📈 দৈনিক লেনদেন</h3>
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>📊 মাসিক তুলনা</h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+            
+            <div id="transactions" class="tab-content">
+                <div class="form-card" id="txFormCard">
+                    <h3>➕ নতুন লেনদেন</h3>
+                    <form onsubmit="addTransaction(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>তারিখ *</label>
+                                <input type="date" id="txDate" required onchange="updateMonthFromDate()" max="">
+                            </div>
+                            <div class="form-group">
+                                <label>মাস *</label>
+                                <select id="txMonth" required>
+                                    <option value="">মাস নির্বাচন করুন</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>ধরন *</label>
+                                <select id="txType" required>
+                                    <option value="">নির্বাচন করুন</option>
+                                    <option value="income">জমা/আয়</option>
+                                    <option value="expense">ব্যয়/খরচ</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>টাকা *</label>
+                                <input type="number" id="txAmount" placeholder="০" required min="0" step="0.01">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>আংশীদার</label>
+                                <input type="text" id="txPartner" list="partnersList">
+                                <datalist id="partnersList"></datalist>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>বিবরণ *</label>
+                                <textarea id="txDescription" required></textarea>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-success">💾 সংরক্ষণ</button>
+                            <button type="reset" class="btn">🔄 রিসেট</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px;">🔍 ফিল্টার</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>মাস</label>
+                            <select id="filterMonth" onchange="renderTransactions()">
+                                <option value="all">সকল মাস</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ধরন</label>
+                            <select id="filterType" onchange="renderTransactions()">
+                                <option value="all">সকল ধরন</option>
+                                <option value="income">জমা/আয়</option>
+                                <option value="expense">ব্যয়/খরচ</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>আংশীদার</label>
+                            <select id="filterPartner" onchange="renderTransactions()">
+                                <option value="all">সকল আংশীদার</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>তারিখ</th>
+                                <th>মাস</th>
+                                <th>ধরন</th>
+                                <th>টাকা</th>
+                                <th>আংশীদার</th>
+                                <th>বিবরণ</th>
+                                <th>কার্যক্রম</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="monthly" class="tab-content">
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button class="btn" onclick="exportMonthlyData()">📥 ডাউনলোড</button>
+                </div>
+                <div id="monthlySummary"></div>
+            </div>
+            
+            <div id="partners" class="tab-content">
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="showAddPartnerModal()" id="addPartnerBtn">➕ আংশীদার যোগ</button>
+                </div>
+                <div class="partners-grid" id="partnersReport"></div>
+            </div>
+
+            <div id="employees" class="tab-content">
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="showAddEmployeeModal()">➕ কর্মচারী যোগ</button>
+                </div>
+                <div class="employees-grid" id="employeesGrid"></div>
+            </div>
+
+            <div id="settings" class="tab-content">
+                <div class="form-card">
+                    <h3>🔐 অ্যাডমিন পাসওয়ার্ড পরিবর্তন</h3>
+                    <div id="settingsAlert"></div>
+                    <form onsubmit="changeAdminPassword(event)">
+                        <div class="form-group">
+                            <label>বর্তমান পাসওয়ার্ড *</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>নতুন পাসওয়ার্ড *</label>
+                            <input type="password" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>পাসওয়ার্ড নিশ্চিত করুন *</label>
+                            <input type="password" id="confirmPassword" required minlength="6">
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-success">💾 পরিবর্তন সংরক্ষণ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h3>👤 ভিউয়ার পাসওয়ার্ড পরিবর্তন</h3>
+                    <div id="viewerAlert"></div>
+                    <form onsubmit="changeViewerPassword(event)">
+                        <div class="form-group">
+                            <label>বর্তমান ভিউয়ার পাসওয়ার্ড *</label>
+                            <input type="password" id="currentViewerPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>নতুন ভিউয়ার পাসওয়ার্ড *</label>
+                            <input type="password" id="newViewerPassword" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>পাসওয়ার্ড নিশ্চিত করুন *</label>
+                            <input type="password" id="confirmViewerPassword" required minlength="6">
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-success">💾 পরিবর্তন সংরক্ষণ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-card">
+                    <h3>⚠️ ডেটা ম্যানেজমেন্ট</h3>
+                    <p style="margin-bottom: 15px; color: #6c757d;">সতর্কতা: এই অপশনটি সাবধানে ব্যবহার করুন</p>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ সকল ডেটা মুছে ফেলুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="partnerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="partnerModalTitle">আংশীদার</h3>
+                <span class="close" onclick="closePartnerModal()">&times;</span>
+            </div>
+            <form onsubmit="savePartner(event)">
+                <input type="hidden" id="partnerEditId">
+                <div class="form-group">
+                    <label>নাম *</label>
+                    <input type="text" id="partnerName" required>
+                </div>
+                <div class="form-group">
+                    <label>ফোন</label>
+                    <input type="text" id="partnerPhone">
+                </div>
+                <div class="form-group">
+                    <label>অবস্থা</label>
+                    <select id="partnerStatus">
+                        <option value="active">সক্রিয়</option>
+                        <option value="inactive">বন্ধ</option>
+                    </select>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-success">💾 সংরক্ষণ</button>
+                    <button type="button" class="btn" onclick="closePartnerModal()">❌ বাতিল</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="employeeModalTitle">কর্মচারী</h3>
+                <span class="close" onclick="closeEmployeeModal()">&times;</span>
+            </div>
+            <form onsubmit="saveEmployee(event)">
+                <input type="hidden" id="employeeEditId">
+                <div class="form-group">
+                    <label>নাম *</label>
+                    <input type="text" id="employeeName" required>
+                </div>
+                <div class="form-group">
+                    <label>পদবি</label>
+                    <input type="text" id="employeePosition">
+                </div>
+                <div class="form-group">
+                    <label>ফোন</label>
+                    <input type="text" id="employeePhone">
+                </div>
+                <div class="form-group">
+                    <label>বেতন</label>
+                    <input type="number" id="employeeSalary" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>যোগদান</label>
+                    <input type="date" id="employeeJoinDate">
+                </div>
+                <div class="form-group">
+                    <label>অবস্থা</label>
+                    <select id="employeeStatus">
+                        <option value="active">সক্রিয়</option>
+                        <option value="inactive">বন্ধ</option>
+                    </select>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-success">💾 সংরক্ষণ</button>
+                    <button type="button" class="btn" onclick="closeEmployeeModal()">❌ বাতিল</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let transactions = [];
+        let partners = [
+            { id: 1, name: 'আবুল হোসেন', phone: '০১৭১১-১২৩৪৫৬', status: 'active' },
+            { id: 2, name: 'রহিম উদ্দিন', phone: '০১৮২২-২৩৪৫৬৭', status: 'active' },
+            { id: 3, name: 'করিম মিয়া', phone: '০১৯৩৩-৩৪৫৬৭৮', status: 'active' },
+            { id: 4, name: 'সালাম খান', phone: '০১৭৪৪-৪৫৬৭৮৯', status: 'active' },
+            { id: 5, name: 'জাহিদ আলী', phone: '০১৮৫৫-৫৬৭৮৯০', status: 'active' },
+            { id: 6, name: 'নাসির উল্লাহ', phone: '০১৯৬৬-৬৭৮৯০১', status: 'active' },
+            { id: 7, name: 'ফারুক আহমেদ', phone: '০১৭৭৭-৭৮৯০১২', status: 'active' },
+            { id: 8, name: 'শফিক রহমান', phone: '০১৮৮৮-৮৯০১২৩', status: 'active' },
+            { id: 9, name: 'মাহমুদ হাসান', phone: '০১৯৯৯-৯০১২৩৪', status: 'active' },
+            { id: 10, name: 'আনোয়ার সাহেব', phone: '০১৭০০-০১২৩৪৫', status: 'active' },
+            { id: 11, name: 'বাবুল মিয়া', phone: '০১৮১১-১২৩৪৫৬', status: 'active' },
+            { id: 12, name: 'কামাল পাশা', phone: '০১৯২২-২৩৪৫৬৭', status: 'active' }
+        ];
+        let employees = [];
+        let currentUser = null;
+        let dailyChart = null;
+        let monthlyChart = null;
+
+        const monthNames = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+        
+        function getAvailableMonths() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const months = [];
+            
+            // Generate months from 3 years ago to current month
+            for (let year = currentYear - 3; year <= currentYear; year++) {
+                const endMonth = (year === currentYear) ? currentMonth : 11;
+                for (let month = 0; month <= endMonth; month++) {
+                    const yearBn = year.toString().replace(/0/g, '০').replace(/1/g, '১').replace(/2/g, '২').replace(/3/g, '৩').replace(/4/g, '৪').replace(/5/g, '৫').replace(/6/g, '৬').replace(/7/g, '৭').replace(/8/g, '৮').replace(/9/g, '৯');
+                    months.push({
+                        value: `${monthNames[month]} ${yearBn}`,
+                        label: `${monthNames[month]} ${yearBn}`
+                    });
+                }
+            }
+            
+            return months;
+        }
+
+        function getUsers() {
+            const saved = localStorage.getItem('appUsers');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return {
+                admin: { password: 'admin123', role: 'admin', name: 'অ্যাডমিন' },
+                viewer: { password: 'viewer123', role: 'viewer', name: 'ভিউয়ার' }
+            };
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('appUsers', JSON.stringify(users));
+        }
+
+        function init() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                currentUser = JSON.parse(saved);
+                showMainApp();
+            } else {
+                document.getElementById('loginScreen').style.display = 'block';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const users = getUsers();
+
+            if (users[username] && users[username].password === password) {
+                currentUser = { username, role: users[username].role, name: users[username].name };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showMainApp();
+            } else {
+                alert('❌ ভুল ইউজারনেম বা পাসওয়ার্ড!');
+            }
+        }
+
+        function logout() {
+            if (confirm('লগআউট করতে চান?')) {
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'block';
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('currentUserName').textContent = currentUser.name;
+            document.getElementById('currentUserRole').textContent = currentUser.role === 'admin' ? 'অ্যাডমিন' : 'ভিউয়ার';
+            
+            applyPermissions();
+            loadData();
+            populateMonthDropdowns();
+            updatePartnersDatalist();
+            updateFilters();
+            setDefaultDate();
+            renderTransactions();
+            updateDashboard();
+            updateMonthlySummary();
+            updatePartnersReport();
+            updateEmployeesGrid();
+        }
+
+        function applyPermissions() {
+            const isViewer = currentUser.role === 'viewer';
+            if (isViewer) {
+                const hide = ['txFormCard', 'addPartnerBtn', 'employeesTab', 'settingsTab'];
+                hide.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+            }
+        }
+
+        function loadData() {
+            const t = localStorage.getItem('businessTransactions');
+            if (t) transactions = JSON.parse(t);
+            const p = localStorage.getItem('businessPartners');
+            if (p) partners = JSON.parse(p);
+            const e = localStorage.getItem('businessEmployees');
+            if (e) employees = JSON.parse(e);
+        }
+
+        function saveData() {
+            localStorage.setItem('businessTransactions', JSON.stringify(transactions));
+            localStorage.setItem('businessPartners', JSON.stringify(partners));
+            localStorage.setItem('businessEmployees', JSON.stringify(employees));
+        }
+
+        function populateMonthDropdowns() {
+            const months = getAvailableMonths();
+            let options = '<option value="">মাস নির্বাচন করুন</option>';
+            months.forEach(month => {
+                options += `<option value="${month.value}">${month.label}</option>`;
+            });
+            document.getElementById('txMonth').innerHTML = options;
+        }
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('txDate');
+            dateInput.value = today;
+            dateInput.max = today; // Set max date to today
+            updateMonthFromDate();
+        }
+
+        function updateMonthFromDate() {
+            const dateInput = document.getElementById('txDate').value;
+            if (!dateInput) return;
+            
+            const selectedDate = new Date(dateInput);
+            const monthIndex = selectedDate.getMonth();
+            const year = selectedDate.getFullYear();
+            
+            // Convert year to Bengali
+            const yearBn = year.toString().replace(/0/g, '০').replace(/1/g, '১').replace(/2/g, '২').replace(/3/g, '৩').replace(/4/g, '৪').replace(/5/g, '৫').replace(/6/g, '৬').replace(/7/g, '৭').replace(/8/g, '৮').replace(/9/g, '৯');
+            
+            const selectedMonth = `${monthNames[monthIndex]} ${yearBn}`;
+            const monthSelect = document.getElementById('txMonth');
+            
+            // Set the selected value
+            const options = monthSelect.querySelectorAll('option');
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === selectedMonth) {
+                    monthSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function updatePartnersDatalist() {
+            const datalist = document.getElementById('partnersList');
+            const active = partners.filter(p => p.status === 'active');
+            datalist.innerHTML = active.map(p => `<option value="${p.name}">`).join('');
+        }
+
+        function updateFilters() {
+            const months = [...new Set(transactions.map(t => t.month))];
+            const selects = ['filterMonth', 'dashboardMonthSelect'];
+            selects.forEach(id => {
+                const sel = document.getElementById(id);
+                const curr = sel.value;
+                sel.innerHTML = '<option value="all">সকল মাস</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
+                if (curr && months.includes(curr)) sel.value = curr;
+            });
+
+            const partnerNames = [...new Set(transactions.filter(t => t.partner).map(t => t.partner))];
+            const pSel = document.getElementById('filterPartner');
+            pSel.innerHTML = '<option value="all">সকল আংশীদার</option>' + partnerNames.map(p => `<option value="${p}">${p}</option>`).join('');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab).classList.add('active');
+            
+            if (tab === 'dashboard') updateDashboard();
+            else if (tab === 'transactions') renderTransactions();
+            else if (tab === 'monthly') updateMonthlySummary();
+            else if (tab === 'partners') updatePartnersReport();
+            else if (tab === 'employees') updateEmployeesGrid();
+        }
+
+        function addTransaction(e) {
+            e.preventDefault();
+            const tx = {
+                id: Date.now(),
+                date: document.getElementById('txDate').value,
+                month: document.getElementById('txMonth').value,
+                type: document.getElementById('txType').value,
+                amount: parseFloat(document.getElementById('txAmount').value),
+                partner: document.getElementById('txPartner').value.trim(),
+                description: document.getElementById('txDescription').value.trim()
+            };
+            transactions.push(tx);
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            saveData();
+            updateFilters();
+            renderTransactions();
+            updateDashboard();
+            updateMonthlySummary();
+            updatePartnersReport();
+            e.target.reset();
+            setDefaultDate();
+            alert('✅ লেনদেন যোগ হয়েছে!');
+        }
+
+        function deleteTransaction(id) {
+            if (confirm('মুছে ফেলতে চান?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                updateFilters();
+                renderTransactions();
+                updateDashboard();
+                updateMonthlySummary();
+                updatePartnersReport();
+            }
+        }
+
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionsBody');
+            let filtered = transactions;
+            
+            const mf = document.getElementById('filterMonth').value;
+            if (mf !== 'all') filtered = filtered.filter(t => t.month === mf);
+            
+            const tf = document.getElementById('filterType').value;
+            if (tf !== 'all') filtered = filtered.filter(t => t.type === tf);
+            
+            const pf = document.getElementById('filterPartner').value;
+            if (pf !== 'all') filtered = filtered.filter(t => t.partner === pf);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">কোন লেনদেন নেই</td></tr>';
+                return;
+            }
+
+            const isViewer = currentUser && currentUser.role === 'viewer';
+            tbody.innerHTML = filtered.map(t => `
+                <tr>
+                    <td>${new Date(t.date).toLocaleDateString('bn-BD')}</td>
+                    <td>${t.month}</td>
+                    <td><span class="badge badge-${t.type === 'income' ? 'income' : 'expense'}">${t.type === 'income' ? 'জমা' : 'খরচ'}</span></td>
+                    <td style="font-weight: bold; color: ${t.type === 'income' ? '#28a745' : '#dc3545'}">৳ ${t.amount.toLocaleString('bn-BD')}</td>
+                    <td>${t.partner || '-'}</td>
+                    <td>${t.description}</td>
+                    <td>${!isViewer ? `<button class="btn btn-danger btn-sm" onclick="deleteTransaction(${t.id})">🗑️</button>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateDashboard() {
+            const mf = document.getElementById('dashboardMonthSelect').value;
+            let filtered = mf !== 'all' ? transactions.filter(t => t.month === mf) : transactions;
+
+            const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const expense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+            
+            document.getElementById('totalIncome').textContent = income.toLocaleString('bn-BD');
+            document.getElementById('totalExpense').textContent = expense.toLocaleString('bn-BD');
+            document.getElementById('netProfit').textContent = (income - expense).toLocaleString('bn-BD');
+            document.getElementById('totalTransactions').textContent = filtered.length;
+
+            updateDailyChart(filtered);
+            updateMonthlyChart();
+        }
+
+        function updateDailyChart(filtered) {
+            const ctx = document.getElementById('dailyChart');
+            if (dailyChart) dailyChart.destroy();
+
+            if (filtered.length === 0) {
+                ctx.parentElement.innerHTML = '<p style="text-align: center; padding: 40px;">কোন ডাটা নেই</p><canvas id="dailyChart"></canvas>';
+                return;
+            }
+
+            const groups = {};
+            filtered.forEach(t => {
+                if (!groups[t.date]) groups[t.date] = { income: 0, expense: 0 };
+                groups[t.date][t.type] += t.amount;
+            });
+
+            const dates = Object.keys(groups).sort();
+            const data = dates.map(d => ({ date: new Date(d).toLocaleDateString('bn-BD'), income: groups[d].income, expense: groups[d].expense }));
+
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.date),
+                    datasets: [
+                        { label: 'জমা', data: data.map(d => d.income), borderColor: '#28a745', backgroundColor: 'rgba(40, 167, 69, 0.1)', tension: 0.4 },
+                        { label: 'খরচ', data: data.map(d => d.expense), borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.1)', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { display: true, position: 'top' } } }
+            });
+        }
+
+        function updateMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart');
+            if (monthlyChart) monthlyChart.destroy();
+
+            const groups = {};
+            transactions.forEach(t => {
+                if (!groups[t.month]) groups[t.month] = { income: 0, expense: 0 };
+                groups[t.month][t.type] += t.amount;
+            });
+
+            const months = Object.keys(groups);
+            const data = months.map(m => ({ month: m, income: groups[m].income, expense: groups[m].expense, profit: groups[m].income - groups[m].expense }));
+
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.month),
+                    datasets: [
+                        { label: 'জমা', data: data.map(d => d.income), backgroundColor: 'rgba(40, 167, 69, 0.8)' },
+                        { label: 'খরচ', data: data.map(d => d.expense), backgroundColor: 'rgba(220, 53, 69, 0.8)' },
+                        { label: 'লাভ', data: data.map(d => d.profit), backgroundColor: 'rgba(79, 172, 254, 0.8)' }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { display: true, position: 'top' } } }
+            });
+        }
+
+        function updateMonthlySummary() {
+            const container = document.getElementById('monthlySummary');
+            const groups = {};
+            transactions.forEach(t => {
+                if (!groups[t.month]) groups[t.month] = { income: 0, expense: 0, transactions: [] };
+                groups[t.month][t.type] += t.amount;
+                groups[t.month].transactions.push(t);
+            });
+
+            if (Object.keys(groups).length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><h3>কোন ডাটা নেই</h3></div>';
+                return;
+            }
+
+            container.innerHTML = Object.keys(groups).map(m => {
+                const d = groups[m];
+                const profit = d.income - d.expense;
+                return `
+                    <div class="form-card">
+                        <h3>📅 ${m}</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card green"><h3>জমা</h3><div class="amount">৳ ${d.income.toLocaleString('bn-BD')}</div></div>
+                            <div class="stat-card red"><h3>খরচ</h3><div class="amount">৳ ${d.expense.toLocaleString('bn-BD')}</div></div>
+                            <div class="stat-card ${profit >= 0 ? 'blue' : 'red'}"><h3>লাভ/লোকসান</h3><div class="amount">৳ ${profit.toLocaleString('bn-BD')}</div></div>
+                            <div class="stat-card purple"><h3>লেনদেন</h3><div class="amount">${d.transactions.length} টি</div></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updatePartnersReport() {
+            const container = document.getElementById('partnersReport');
+            const data = {};
+            
+            partners.forEach(p => {
+                data[p.name] = { ...p, income: 0, expense: 0, transactions: [] };
+            });
+
+            transactions.forEach(t => {
+                if (t.partner) {
+                    if (!data[t.partner]) data[t.partner] = { name: t.partner, phone: '', status: 'active', income: 0, expense: 0, transactions: [] };
+                    data[t.partner][t.type] += t.amount;
+                    data[t.partner].transactions.push(t);
+                }
+            });
+
+            const active = Object.values(data).filter(p => p.transactions.length > 0 || p.phone);
+            if (active.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><h3>কোন ডাটা নেই</h3></div>';
+                return;
+            }
+
+            const isViewer = currentUser && currentUser.role === 'viewer';
+            container.innerHTML = active.map((p, i) => {
+                const net = p.income - p.expense;
+                const badge = p.status === 'active' ? '<span class="status-badge status-active">সক্রিয়</span>' : '<span class="status-badge status-inactive">বন্ধ</span>';
+                return `
+                    <div class="partner-card">
+                        <div class="partner-header">
+                            <div class="partner-avatar">${p.id || i + 1}</div>
+                            <div class="partner-info" style="flex: 1;">
+                                <h3>${p.name} ${badge}</h3>
+                                ${p.phone ? `<p>${p.phone}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="partner-stats">
+                            <div class="partner-stat income"><label>জমা</label><div class="value">৳ ${p.income.toLocaleString('bn-BD')}</div></div>
+                            <div class="partner-stat expense"><label>খরচ</label><div class="value">৳ ${p.expense.toLocaleString('bn-BD')}</div></div>
+                            <div class="partner-stat"><label>নিট</label><div class="value" style="color: ${net >= 0 ? '#28a745' : '#dc3545'}">৳ ${net.toLocaleString('bn-BD')}</div></div>
+                            <div class="partner-stat"><label>লেনদেন</label><div class="value">${p.transactions.length} টি</div></div>
+                        </div>
+                        ${!isViewer && p.id ? `
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-sm" onclick="editPartner(${p.id})">✏️ এডিট</button>
+                            <button class="btn btn-sm ${p.status === 'active' ? 'btn-danger' : 'btn-success'}" onclick="togglePartnerStatus(${p.id})">
+                                ${p.status === 'active' ? '🔒 বন্ধ' : '🔓 চালু'}
+                            </button>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showAddPartnerModal() {
+            document.getElementById('partnerModalTitle').textContent = 'নতুন আংশীদার';
+            document.getElementById('partnerEditId').value = '';
+            document.getElementById('partnerName').value = '';
+            document.getElementById('partnerPhone').value = '';
+            document.getElementById('partnerStatus').value = 'active';
+            document.getElementById('partnerModal').style.display = 'block';
+        }
+
+        function editPartner(id) {
+            const p = partners.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('partnerModalTitle').textContent = 'এডিট করুন';
+            document.getElementById('partnerEditId').value = p.id;
+            document.getElementById('partnerName').value = p.name;
+            document.getElementById('partnerPhone').value = p.phone || '';
+            document.getElementById('partnerStatus').value = p.status || 'active';
+            document.getElementById('partnerModal').style.display = 'block';
+        }
+
+        function closePartnerModal() {
+            document.getElementById('partnerModal').style.display = 'none';
+        }
+
+        function savePartner(e) {
+            e.preventDefault();
+            const id = document.getElementById('partnerEditId').value;
+            const name = document.getElementById('partnerName').value.trim();
+            const phone = document.getElementById('partnerPhone').value.trim();
+            const status = document.getElementById('partnerStatus').value;
+
+            if (id) {
+                const p = partners.find(x => x.id === parseInt(id));
+                if (p) { p.name = name; p.phone = phone; p.status = status; }
+            } else {
+                const newId = partners.length > 0 ? Math.max(...partners.map(p => p.id)) + 1 : 1;
+                partners.push({ id: newId, name, phone, status });
+            }
+
+            saveData();
+            updatePartnersDatalist();
+            updatePartnersReport();
+            closePartnerModal();
+            alert('✅ সংরক্ষিত!');
+        }
+
+        function togglePartnerStatus(id) {
+            const p = partners.find(x => x.id === id);
+            if (!p) return;
+            const newStatus = p.status === 'active' ? 'inactive' : 'active';
+            if (confirm(newStatus === 'inactive' ? 'বন্ধ করবেন?' : 'চালু করবেন?')) {
+                p.status = newStatus;
+                saveData();
+                updatePartnersDatalist();
+                updatePartnersReport();
+            }
+        }
+
+        function showAddEmployeeModal() {
+            document.getElementById('employeeModalTitle').textContent = 'নতুন কর্মচারী';
+            document.getElementById('employeeEditId').value = '';
+            document.getElementById('employeeName').value = '';
+            document.getElementById('employeePosition').value = '';
+            document.getElementById('employeePhone').value = '';
+            document.getElementById('employeeSalary').value = '';
+            document.getElementById('employeeJoinDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('employeeStatus').value = 'active';
+            document.getElementById('employeeModal').style.display = 'block';
+        }
+
+        function editEmployee(id) {
+            const e = employees.find(x => x.id === id);
+            if (!e) return;
+            document.getElementById('employeeModalTitle').textContent = 'এডিট করুন';
+            document.getElementById('employeeEditId').value = e.id;
+            document.getElementById('employeeName').value = e.name;
+            document.getElementById('employeePosition').value = e.position || '';
+            document.getElementById('employeePhone').value = e.phone || '';
+            document.getElementById('employeeSalary').value = e.salary || '';
+            document.getElementById('employeeJoinDate').value = e.joinDate || '';
+            document.getElementById('employeeStatus').value = e.status || 'active';
+            document.getElementById('employeeModal').style.display = 'block';
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').style.display = 'none';
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            const id = document.getElementById('employeeEditId').value;
+            const name = document.getElementById('employeeName').value.trim();
+            const position = document.getElementById('employeePosition').value.trim();
+            const phone = document.getElementById('employeePhone').value.trim();
+            const salary = parseFloat(document.getElementById('employeeSalary').value) || 0;
+            const joinDate = document.getElementById('employeeJoinDate').value;
+            const status = document.getElementById('employeeStatus').value;
+
+            if (id) {
+                const emp = employees.find(x => x.id === parseInt(id));
+                if (emp) { emp.name = name; emp.position = position; emp.phone = phone; emp.salary = salary; emp.joinDate = joinDate; emp.status = status; }
+            } else {
+                const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                employees.push({ id: newId, name, position, phone, salary, joinDate, status });
+            }
+
+            saveData();
+            updateEmployeesGrid();
+            closeEmployeeModal();
+            alert('✅ সংরক্ষিত!');
+        }
+
+        function deleteEmployee(id) {
+            if (confirm('মুছে ফেলবেন?')) {
+                employees = employees.filter(e => e.id !== id);
+                saveData();
+                updateEmployeesGrid();
+            }
+        }
+
+        function updateEmployeesGrid() {
+            const container = document.getElementById('employeesGrid');
+            if (employees.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👨‍💼</div><h3>কোন কর্মচারী নেই</h3></div>';
+                return;
+            }
+
+            container.innerHTML = employees.map(e => {
+                const badge = e.status === 'active' ? '<span class="status-badge status-active">সক্রিয়</span>' : '<span class="status-badge status-inactive">বন্ধ</span>';
+                return `
+                    <div class="employee-card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <div>
+                                <h3>${e.name} ${badge}</h3>
+                                ${e.position ? `<p style="color: #6c757d; font-size: 13px;">${e.position}</p>` : ''}
+                            </div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                            ${e.phone ? `<p><strong>📱:</strong> ${e.phone}</p>` : ''}
+                            ${e.salary ? `<p><strong>💰:</strong> ৳ ${e.salary.toLocaleString('bn-BD')}</p>` : ''}
+                            ${e.joinDate ? `<p><strong>📅:</strong> ${new Date(e.joinDate).toLocaleDateString('bn-BD')}</p>` : ''}
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-sm" onclick="editEmployee(${e.id})">✏️ এডিট</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${e.id})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function changeAdminPassword(e) {
+            e.preventDefault();
+            const users = getUsers();
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const alertDiv = document.getElementById('settingsAlert');
+
+            if (users.admin.password !== current) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ বর্তমান পাসওয়ার্ড ভুল!</div>';
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ নতুন পাসওয়ার্ড মিলছে না!</div>';
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!</div>';
+                return;
+            }
+
+            users.admin.password = newPass;
+            saveUsers(users);
+            alertDiv.innerHTML = '<div class="alert alert-success">✅ পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!</div>';
+            e.target.reset();
+        }
+
+        function changeViewerPassword(e) {
+            e.preventDefault();
+            const users = getUsers();
+            const current = document.getElementById('currentViewerPassword').value;
+            const newPass = document.getElementById('newViewerPassword').value;
+            const confirm = document.getElementById('confirmViewerPassword').value;
+            const alertDiv = document.getElementById('viewerAlert');
+
+            if (users.viewer.password !== current) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ বর্তমান পাসওয়ার্ড ভুল!</div>';
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ নতুন পাসওয়ার্ড মিলছে না!</div>';
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alertDiv.innerHTML = '<div class="alert alert-danger">❌ পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে!</div>';
+                return;
+            }
+
+            users.viewer.password = newPass;
+            saveUsers(users);
+            alertDiv.innerHTML = '<div class="alert alert-success">✅ পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!</div>';
+            e.target.reset();
+        }
+
+        function clearAllData() {
+            if (confirm('সতর্কতা! এটি সকল ডেটা মুছে ফেলবে। নিশ্চিত?')) {
+                if (confirm('আপনি কি সত্যিই সকল ডেটা মুছে ফেলতে চান?')) {
+                    localStorage.removeItem('businessTransactions');
+                    localStorage.removeItem('businessPartners');
+                    localStorage.removeItem('businessEmployees');
+                    alert('✅ সকল ডেটা মুছে ফেলা হয়েছে!');
+                    location.reload();
+                }
+            }
+        }
+
+        function exportMonthlyData() {
+            const groups = {};
+            transactions.forEach(t => {
+                if (!groups[t.month]) groups[t.month] = { income: 0, expense: 0 };
+                groups[t.month][t.type] += t.amount;
+            });
+
+            let text = 'মাসিক রিপোর্ট\n' + '='.repeat(50) + '\n\n';
+            Object.keys(groups).forEach(m => {
+                const d = groups[m];
+                const p = d.income - d.expense;
+                text += `${m}\nজমা: ৳ ${d.income.toLocaleString('bn-BD')}\nখরচ: ৳ ${d.expense.toLocaleString('bn-BD')}\nলাভ: ৳ ${p.toLocaleString('bn-BD')}\n${'-'.repeat(50)}\n\n`;
+            });
+
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'মাসিক-রিপোর্ট.txt';
+            a.click();
+        }
+
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
